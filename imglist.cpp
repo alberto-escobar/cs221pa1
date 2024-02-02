@@ -167,8 +167,30 @@ ImgNode* ImgList::SelectNode(ImgNode* rowstart, int selectionmode) {
  */
 PNG ImgList::Render(bool fillgaps, int fillmode) const {
     // Add/complete your implementation below
-    
-    PNG outpng; //this will be returned later. Might be a good idea to resize it at some point.
+    ImgNode * currentRow = northwest;
+    int width = GetDimensionFullX();
+    int height = GetDimensionY();
+    PNG outpng = PNG(width, height);
+    int x, y;
+    y = 0;
+    while (y < height && currentRow != NULL) {
+        ImgNode * currentColumn = currentRow;
+        x = 0;
+        while (x < width && currentColumn != NULL) {
+            RGBAPixel * pixel = outpng.getPixel(x,y);
+            *pixel = currentColumn->colour;
+            int skip = 0;
+            x++;
+            while (skip < currentColumn->skipleft) {
+                pixel = outpng.getPixel(x,y);
+                pixel = new RGBAPixel(255, 255, 255);
+                x++;
+            }
+            currentColumn = currentColumn->east;
+        }
+        currentRow = currentRow->south;
+        y++;
+    }
   
     return outpng;
 }
