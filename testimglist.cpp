@@ -49,7 +49,7 @@ void TestConstructorRender() {
         cout << "Writing output PNG to 3x4-r_0_0.png... ";
         outputimg.writeToFile("output-images/3x4-r_0_0.png");
         cout << "done." << endl;
-        //TestImage("output-images/5x6-c_1_0-r_0_0.png","soln-output-images/5x6-c_1_0-r_0_0.png");
+        TestImage("output-images/3x4-r_0_0.png","soln-images/soln-3x4-r_0_0.png");
         cout << "Exiting TestConstructorRender function" << endl;
     }
     else {
@@ -187,7 +187,7 @@ void TestRenderMode2() {
     }
 }
 
-/*
+
 void TestImage(std::string tst, std::string exp) { 
 	PNG expIm, outIm;          
 	expIm.readFromFile(exp);
@@ -199,4 +199,3 @@ void TestImage(std::string tst, std::string exp) {
     }
     
 }
-*/

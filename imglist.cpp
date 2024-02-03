@@ -144,8 +144,28 @@ unsigned int ImgList::GetDimensionFullX() const {
  */
 ImgNode* ImgList::SelectNode(ImgNode* rowstart, int selectionmode) {
     // add your implementation below
-  
-    return NULL;
+    ImgNode* currentNode = rowstart->east;
+    ImgNode* selectedNode;
+    int maxBrightness = -1;
+    int minDifference = 6;
+    while (currentNode->east->east != NULL) {
+        if (selectionmode) {
+            int brightness = (currentNode->colour.r + currentNode->colour.g + currentNode->colour.b)*currentNode->colour.a; 
+            if (maxBrightness < brightness) {
+                selectedNode = currentNode;
+                maxBrightness = brightness;
+            }
+        } else {
+            int difference = currentNode->colour.distanceTo(currentNode->east->colour) + currentNode->colour.distanceTo(currentNode->west->colour);
+            if (difference < minDifference) {
+                selectedNode = currentNode;
+                minDifference = difference;
+            }
+
+        }
+        currentNode = currentNode->east;
+    }
+    return selectedNode;
 }
 
 /**
@@ -183,6 +203,7 @@ PNG ImgList::Render(bool fillgaps, int fillmode) const {
             x++;
             while (skip < currentColumn->skipleft) {
                 pixel = outpng.getPixel(x,y);
+                //insert fill modes here
                 pixel = new RGBAPixel(255, 255, 255);
                 x++;
             }
@@ -211,7 +232,24 @@ PNG ImgList::Render(bool fillgaps, int fillmode) const {
  */
 void ImgList::Carve(int selectionmode) {
     // add your implementation here
-	
+	ImgNode * currentRow = northwest;
+    while (currentRow != NULL) {
+        ImgNode * carvedNode = SelectNode(currentRow, selectionmode);
+        carvedNode->north->south = carvedNode->south;
+        carvedNode->north->skipdown++;
+
+        carvedNode->south->north = carvedNode->north;
+        carvedNode->south->skipup++;
+
+        carvedNode->east->west = carvedNode->west;
+        carvedNode->east->skipleft++;
+
+        carvedNode->west->east = carvedNode->east;
+        carvedNode->west->skipright++;
+
+        delete carvedNode;
+        carvedNode = NULL;
+    }
 }
 
 // note that a node on the boundary will never be selected for removal
