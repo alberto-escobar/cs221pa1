@@ -24,8 +24,8 @@ int main(void) {
     // call the various test functions
     // you may comment and uncomment these as needed
     TestConstructorRender();
-    // TestCarveMode0();
-    // TestRenderMode2();
+    TestCarveMode0();
+     TestRenderMode2();
 
     return 0;
 }
@@ -49,7 +49,9 @@ void TestConstructorRender() {
         cout << "Writing output PNG to 3x4-r_0_0.png... ";
         outputimg.writeToFile("output-images/3x4-r_0_0.png");
         cout << "done." << endl;
+
         TestImage("output-images/3x4-r_0_0.png","soln-images/soln-3x4-r_0_0.png");
+
         cout << "Exiting TestConstructorRender function" << endl;
     }
     else {
@@ -89,6 +91,8 @@ void TestCarveMode0() {
         outputimg1.writeToFile("output-images/5x6-c_1_0-r_0_0.png");
         cout << "done." << endl;
 
+        TestImage("output-images/5x6-c_1_0-r_0_0.png","soln-images/soln-5x6-c_1_0-r_0_0.png");
+
         cout << "Rendering carved image using rendermode 1 and fillmode 0... ";
         PNG outputimg2 = list5x6.Render(true, 0);
         cout << "done." << endl;
@@ -97,6 +101,8 @@ void TestCarveMode0() {
         outputimg2.writeToFile("output-images/5x6-c_1_0-r_1_0.png");
         cout << "done." << endl;
 
+        TestImage("output-images/5x6-c_1_0-r_1_0.png","soln-images/soln-5x6-c_1_0-r_1_0.png");
+
         cout << "Rendering carved image using rendermode 1 and fillmode 1... ";
         PNG outputimg3 = list5x6.Render(true, 1);
         cout << "done." << endl;
@@ -104,6 +110,8 @@ void TestCarveMode0() {
         cout << "Writing output PNG to 5x6-c_1_0-r_1_1.png... ";
         outputimg3.writeToFile("output-images/5x6-c_1_0-r_1_1.png");
         cout << "done." << endl;
+
+        TestImage("output-images/5x6-c_1_0-r_1_1.png","soln-images/soln-5x6-c_1_0-r_1_1.png");
 
         cout << "Carving a second pixel from image... ";
         list5x6.Carve(1, 0);
@@ -125,6 +133,8 @@ void TestCarveMode0() {
         outputimg4.writeToFile("output-images/5x6-c_2_0-r_0_0.png");
         cout << "done." << endl;
 
+        TestImage("output-images/5x6-c_2_0-r_0_0.png","soln-images/soln-5x6-c_2_0-r_0_0.png");
+
         cout << "Rendering carved image using rendermode 1 and fillmode 2... ";
         PNG outputimg5 = list5x6.Render(true, 2);
         cout << "done." << endl;
@@ -132,6 +142,8 @@ void TestCarveMode0() {
         cout << "Writing output PNG to 5x6-c_2_0-r_1_2.png... ";
         outputimg5.writeToFile("output-images/5x6-c_2_0-r_1_2.png");
         cout << "done." << endl;
+
+        TestImage("output-images/5x6-c_2_0-r_1_2.png","soln-images/soln-5x6-c_2_0-r_1_2.png");
 
         cout << "Exiting TestCarveMode0 function" << endl;
     }
@@ -172,6 +184,8 @@ void TestRenderMode2() {
         outputimg1.writeToFile("output-images/6x6-c_12_0-r_0_0.png");
         cout << "done." << endl;
 
+        TestImage("output-images/6x6-c_12_0-r_0_0.png","soln-images/soln-6x6-c_12_0-r_0_0.png");
+
         cout << "Rendering carved image using rendermode 1 and fillmode 2... ";
         PNG outputimg2 = list6x6.Render(true, 2);
         cout << "done." << endl;
@@ -180,6 +194,8 @@ void TestRenderMode2() {
         outputimg2.writeToFile("output-images/6x6-c_12_0-r_1_2.png");
         cout << "done." << endl;
 
+        TestImage("output-images/6x6-c_12_0-r_1_2.png","soln-images/soln-6x6-c_12_0-r_1_2.png");
+        
         cout << "Exiting TestRenderMode2 function" << endl;
     }
     else {

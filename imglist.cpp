@@ -146,15 +146,20 @@ ImgNode* ImgList::SelectNode(ImgNode* rowstart, int selectionmode) {
     // add your implementation below
     ImgNode* currentNode = rowstart->east;
     ImgNode* selectedNode;
-    int maxBrightness = -1;
+    int minBrightness = 800000;
     int minDifference = 6;
-    while (currentNode->east->east != NULL) {
-        if (selectionmode) {
+    
+    while (currentNode->east != NULL) {
+        
+        if (selectionmode == 0) {
             int brightness = (currentNode->colour.r + currentNode->colour.g + currentNode->colour.b)*currentNode->colour.a; 
-            if (maxBrightness < brightness) {
+            if (brightness < minBrightness) {
                 selectedNode = currentNode;
-                maxBrightness = brightness;
+                minBrightness = brightness;
+                
+                
             }
+        
         } else {
             int difference = currentNode->colour.distanceTo(currentNode->east->colour) + currentNode->colour.distanceTo(currentNode->west->colour);
             if (difference < minDifference) {
@@ -188,7 +193,12 @@ ImgNode* ImgList::SelectNode(ImgNode* rowstart, int selectionmode) {
 PNG ImgList::Render(bool fillgaps, int fillmode) const {
     // Add/complete your implementation below
     ImgNode * currentRow = northwest;
-    int width = GetDimensionFullX();
+    int width;
+    if (fillgaps) {
+        width = GetDimensionFullX();
+    } else {
+        width = GetDimensionX();
+    }
     int height = GetDimensionY();
     PNG outpng = PNG(width, height);
     int x, y;
@@ -200,13 +210,27 @@ PNG ImgList::Render(bool fillgaps, int fillmode) const {
             RGBAPixel * pixel = outpng.getPixel(x,y);
             *pixel = currentColumn->colour;
             int skip = 0;
-            x++;
-            while (skip < currentColumn->skipleft) {
-                pixel = outpng.getPixel(x,y);
-                //insert fill modes here
-                pixel = new RGBAPixel(255, 255, 255);
+            int skips = currentColumn->skipleft;
+            while (skip < skips && fillgaps) {
+                
                 x++;
+                pixel = outpng.getPixel(x,y);
+                if (fillmode == 0) {
+                    *pixel = RGBAPixel(currentColumn->colour);
+                } else if (fillmode == 1) {
+                    int avgr = (currentColumn->colour.r + currentColumn->east->colour.r)/2;
+                    int avgg = (currentColumn->colour.g + currentColumn->east->colour.g)/2;
+                    int avgb = (currentColumn->colour.b + currentColumn->east->colour.b)/2;
+                    *pixel = RGBAPixel(avgr, avgg, avgb);
+                } else if (fillmode == 2) {
+                    int gradr = currentColumn->colour.r + (currentColumn->east->colour.r - currentColumn->colour.r)*(skip+1)/(skips+1);
+                    int gradg = currentColumn->colour.g + (currentColumn->east->colour.g - currentColumn->colour.g)*(skip+1)/(skips+1);
+                    int gradb = currentColumn->colour.b + (currentColumn->east->colour.b - currentColumn->colour.b)*(skip+1)/(skips+1);
+                    *pixel = RGBAPixel(gradr, gradg, gradb);
+                }
+                skip++;
             }
+            x++;
             currentColumn = currentColumn->east;
         }
         currentRow = currentRow->south;
@@ -231,24 +255,32 @@ PNG ImgList::Render(bool fillgaps, int fillmode) const {
  *       the size of the gap.
  */
 void ImgList::Carve(int selectionmode) {
-    // add your implementation here
+    // add your implementation 
+
 	ImgNode * currentRow = northwest;
     while (currentRow != NULL) {
+        
         ImgNode * carvedNode = SelectNode(currentRow, selectionmode);
-        carvedNode->north->south = carvedNode->south;
-        carvedNode->north->skipdown++;
-
-        carvedNode->south->north = carvedNode->north;
-        carvedNode->south->skipup++;
-
+        
         carvedNode->east->west = carvedNode->west;
-        carvedNode->east->skipleft++;
+        carvedNode->east->skipright += carvedNode->skipright + 1;
 
         carvedNode->west->east = carvedNode->east;
-        carvedNode->west->skipright++;
+        carvedNode->west->skipleft+= carvedNode->skipleft + 1;
+
+        if (carvedNode->north != NULL) {
+            carvedNode->north->south = carvedNode->south;
+            carvedNode->north->skipdown += carvedNode->skipdown + 1;
+        }
+
+        if (carvedNode->south != NULL) {
+            carvedNode->south->north = carvedNode->north;
+            carvedNode->south->skipup+= carvedNode->skipup + 1;
+        }
 
         delete carvedNode;
         carvedNode = NULL;
+        currentRow = currentRow->south;
     }
 }
 
@@ -268,7 +300,15 @@ void ImgList::Carve(int selectionmode) {
  */
 void ImgList::Carve(unsigned int rounds, int selectionmode) {
     // add your implementation here
-	
+    unsigned maxRounds = GetDimensionX() - 2;
+    if (rounds > maxRounds) {
+        rounds = maxRounds;
+    }
+    int cycle = 0;
+    while (cycle < rounds) {
+	    Carve(selectionmode);
+        cycle++;
+    }
 }
 
 
@@ -280,7 +320,18 @@ void ImgList::Carve(unsigned int rounds, int selectionmode) {
  */
 void ImgList::Clear() {
     // add your implementation here
-	
+    ImgNode * currentRow = northwest;
+    while (currentRow != NULL) {
+        ImgNode * currentColumn = currentRow;
+        while (currentColumn != NULL) {
+            ImgNode * temp = currentColumn -> east; 
+            delete currentColumn;
+            currentColumn = temp;
+        }
+        currentRow = currentRow->south;
+    }
+    northwest = NULL;
+    southeast = NULL;
 }
 
 /**
