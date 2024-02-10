@@ -30,35 +30,39 @@ ImgList::ImgList() {
  */
 ImgList::ImgList(PNG& img) {
     // build the linked node structure and set the member attributes appropriately
-    ImgNode* topnode;
-    ImgNode* leftnode;
-    ImgNode* nexttopnode;
-    for (unsigned y = 0; y < img.height(); ++y) {
-        for (unsigned x = 0; x < img.width(); ++x) {
-            ImgNode* node = new ImgNode();
-            node->colour = *img.getPixel(x, y);
-            if ((y == 0) && (x == 0)) {
-                northwest = node;
-            }
-            if ((y == img.height() - 1) && (x == img.width() - 1)) {
-                southeast = node;
-            }
-            if (x == 0) {
-                leftnode = node;
-                nexttopnode = node;
-            } else {
-                leftnode->east = node;
-                node->west = leftnode;
-                leftnode = node;
-            }
-            if (y != 0) {
-                topnode->south = node;
-                node->north = topnode;
-                topnode = topnode->east;
-            }
+    
+    unsigned width = img.width();
+    unsigned height = img.height();
+    ImgNode* picture[width][height];
+
+    for (unsigned x = 0; x < width; x++) {
+        for (unsigned y = 0; y < height; y++) {
+            RGBAPixel * pixel = img.getPixel(x, y);
+            ImgNode *node = new ImgNode();
+            node->colour = *pixel;
+            picture[x][y] = node;
         }
-        topnode = nexttopnode;
     }
+
+    ImgNode *node;
+    for (unsigned y = 1; y < height; y++) {
+        for (unsigned x = 0; x < width; x++) {
+            node = picture[x][y];
+            node->north = picture[x][y-1];
+            node->north->south = node;
+        }
+    }
+
+    for (unsigned y = 0; y < height; y++) {
+        for (unsigned x = 1; x < width; x++) {
+            node = picture[x][y];
+            node->west = picture[x-1][y];
+            node->west->east = node;
+        }
+    }
+
+    northwest = picture[0][0];
+    southeast = picture[width - 1][height - 1];
 }
 
 /************
@@ -304,7 +308,7 @@ void ImgList::Carve(unsigned int rounds, int selectionmode) {
     if (rounds > maxRounds) {
         rounds = maxRounds;
     }
-    unsigned cycle = 0;
+    int cycle = 0;
     while (cycle < rounds) {
 	    Carve(selectionmode);
         cycle++;
@@ -345,40 +349,43 @@ void ImgList::Clear() {
  */
 void ImgList::Copy(const ImgList& otherlist) {
     // add your implementation here
-    unsigned width = otherlist.GetDimensionFullX();
+    unsigned width = otherlist.GetDimensionX();
     unsigned height = otherlist.GetDimensionY();
-    ImgNode* current_other_row = otherlist.northwest;
-    ImgNode* top[width];
-    for (unsigned column = 0; column < width; ++column) { 
-        top[column] = nullptr;
-    }
-    for (unsigned row = 0; row < height; ++row) {
-        ImgNode* other_node = current_other_row;
-        ImgNode* prev_node = nullptr;
-        for (unsigned column = 0; column < width; ++column) {
-            ImgNode* node = new ImgNode(*other_node);
-            if (prev_node) {
-                prev_node->east = node;
-            }
-            node->west = prev_node;
-            node->north = top[column];
-            if (top[column]) {
-                top[column]->south = node;
-            }
-            top[column] = node;
-            if ((row == 0) && (column == 0)) {
-                northwest = node;
-            }
-            if ((row == height - 1) && (column == width - 1)) {
-                southeast = node;
-            }
-            column += node->skipright;
-            other_node = other_node->east;
-            prev_node = node;
+	ImgNode * newlistNodes[height][width];
+    
+    ImgNode * otherlistrow = otherlist.northwest;
+    int row = 0;
+    int column;
+    while (otherlistrow != NULL) {
+        ImgNode * otherlistnode = otherlistrow;
+        column = 0;
+        while (otherlistnode != NULL) {
+            newlistNodes[row][column] = new ImgNode(*otherlistnode);
+            otherlistnode = otherlistnode->east;
+            column++;
         }
-        current_other_row = current_other_row->south;
+        otherlistrow = otherlistrow->south;
+        row++;
+    }
+    ImgNode *node;
+    for (unsigned y = 1; y < height; y++) {
+        for (unsigned x = 0; x < width; x++) {
+            node = newlistNodes[y][x];
+            node->north = newlistNodes[y-1][x];
+            node->north->south = node;
+        }
     }
 
+    for (unsigned y = 0; y < height; y++) {
+        for (unsigned x = 1; x < width; x++) {
+            node = newlistNodes[y][x];
+            node->west = newlistNodes[y][x-1];
+            node->west->east = node;
+        }
+    }
+    
+    northwest = newlistNodes[0][0];
+    southeast = newlistNodes[height - 1][width - 1];
 }
 
 /*************************************************************************************************

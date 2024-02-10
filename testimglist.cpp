@@ -17,6 +17,7 @@ using namespace cs221util;
 void TestConstructorRender();
 void TestCarveMode0();
 void TestRenderMode2();
+void personaltest();
 void TestImage(std::string, std::string );
 
 int main(void) {
@@ -25,7 +26,8 @@ int main(void) {
     // you may comment and uncomment these as needed
     TestConstructorRender();
     TestCarveMode0();
-     TestRenderMode2();
+    TestRenderMode2();
+    //personaltest();
 
     return 0;
 }
@@ -196,7 +198,53 @@ void TestRenderMode2() {
 
         TestImage("output-images/6x6-c_12_0-r_1_2.png","soln-images/soln-6x6-c_12_0-r_1_2.png");
         
+        cout << "Testing copy function." << endl;
+        cout << "copying list6x6 into newlist6x6... ";
+        ImgList newlist6x6 = ImgList(list6x6);
+        cout << "done." << endl;
+
+        cout << "Rendering newlist6x6 using rendermode 1 and fillmode 2... ";
+        PNG outputimg3 = newlist6x6.Render(true, 2);
+        cout << "done." << endl;
+        
+        cout << "Writing output PNG to copy-of-6x6-c_12_0-r_1_2.png... ";
+        outputimg3.writeToFile("output-images/copy-of-6x6-c_12_0-r_1_2.png");
+        cout << "done." << endl;
+
+        TestImage("output-images/copy-of-6x6-c_12_0-r_1_2.png","soln-images/soln-6x6-c_12_0-r_1_2.png");
+    
         cout << "Exiting TestRenderMode2 function" << endl;
+    }
+    else {
+        cout << "Input PNG image not read. Exiting..." << endl;
+    }
+}
+
+void personaltest() {
+    cout << "Entered TestRenderMode2 function" << endl;
+
+    PNG inimg;
+    inimg.readFromFile("input-images/personal.png");
+
+    if (true) {
+        cout << "Input PNG personal.png successfully read." << endl;
+        cout << "Creating ImgList object using input PNG... ";
+        ImgList personallist(inimg);
+        cout << "done." << endl;
+
+        cout << "Attempting to carve more pixels than allowable in mode 0... ";
+        personallist.Carve(100, 0);
+        cout << "done." << endl;
+
+        cout << "Rendering carved image using rendermode 1 and fillmode 2... ";
+        PNG outputimg = personallist.Render(true, 2);
+        cout << "done." << endl;
+
+        cout << "Writing output PNG to personal-c_12_0-r_1_2.png... ";
+        outputimg.writeToFile("output-images/personal-c_12_0-r_1_2.png");
+        cout << "done." << endl;
+
+        cout << "Exiting personaltest function" << endl;
     }
     else {
         cout << "Input PNG image not read. Exiting..." << endl;
